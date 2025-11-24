@@ -1,0 +1,100 @@
+<div class="freetogame-container">
+  <h1>Free to Game</h1>
+  
+  <!-- Filters Section -->
+  <div class="filters">
+    <div class="filter-group">
+      <label>Platform:</label>
+      <select [(ngModel)]="platform" (change)="onPlatformChange()">
+        <option *ngFor="let p of platforms" [value]="p.value">
+          {{ p.icon }} {{ p.label }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Category:</label>
+      <select [(ngModel)]="category" (change)="onCategoryChange()">
+        <option *ngFor="let c of categories" [value]="c.value">
+          {{ c.label }}
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Sort By:</label>
+      <select [(ngModel)]="sortBy" (change)="onSortByChange()">
+        <option value="">None</option>
+        <option value="popularity">Popularity</option>
+        <option value="release-date">Release Date</option>
+        <option value="alphabetical">Alphabetical</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Search Title:</label>
+      <input type="text" [(ngModel)]="searchTitle" (change)="onSearchChange()" placeholder="Filter by title..." />
+    </div>
+  </div>
+
+  <!-- Options Section -->
+  <div class="options">
+    <label>
+      <input type="checkbox" [(ngModel)]="useProxy" (change)="onProxyToggle()" />
+      Use CORS Proxy
+    </label>
+    <label>
+      <input type="checkbox" [(ngModel)]="mockMode" (change)="onMockModeToggle()" />
+      Mock Mode
+    </label>
+    <button (click)="onLoadGamesClick()" [disabled]="loading">
+      {{ loading ? 'Loading...' : 'Load Games' }}
+    </button>
+    <button (click)="onResetClick()">Reset</button>
+    <button (click)="runTests()">Run Tests</button>
+    <button (click)="clearTests()" [disabled]="testOutput.length === 0">Clear Tests</button>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <!-- Test Results -->
+  <div *ngIf="testOutput.length > 0" class="test-results">
+    <h3>Test Results</h3>
+    <div *ngFor="let result of testOutput" [class.passed]="result.passed" [class.failed]="!result.passed" class="test-item">
+      <strong>{{ result.name }}</strong>
+      <span>{{ result.passed ? '✓ PASSED' : '✗ FAILED' }}</span>
+      <div *ngIf="result.expected !== undefined" class="test-details">
+        Expected: {{ result.expected }}, Got: {{ result.got }}
+      </div>
+      <div *ngIf="result.details" class="test-details">{{ result.details }}</div>
+    </div>
+  </div>
+
+  <!-- Games Grid -->
+  <div class="games-grid">
+    <div *ngFor="let game of filteredGames" class="game-card" (mouseenter)="hoveredGameId = game.id" (mouseleave)="hoveredGameId = null">
+      <img *ngIf="game.thumbnail" [src]="game.thumbnail" [alt]="game.title" class="game-thumbnail" />
+      <div class="game-info">
+        <h3>{{ game.title }}</h3>
+        <p class="small-info">{{ smallInfoRow(game) }}</p>
+        <p class="description">{{ game.short_description || game.description }}</p>
+        <div class="game-footer">
+          <a [href]="getGameUrl(game)" target="_blank" class="game-link">Play Now</a>
+          <span class="publisher" *ngIf="game.publisher">{{ game.publisher }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && filteredGames.length === 0 && games.length > 0" class="empty-state">
+    No games match your filters.
+  </div>
+
+  <div *ngIf="!loading && games.length === 0 && !error" class="empty-state">
+    Click "Load Games" to get started.
+  </div>
+</div>
